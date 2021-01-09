@@ -1,0 +1,1407 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Business Problem \n",
+    "\n",
+    "### This is a titanic dataset \n",
+    "###### Create Naive Bayes model and will predict to understand the travellers who were survived \n",
+    "###### There are 891 rows and 12 columns "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 87,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "## Import required libraries \n",
+    "\n",
+    "import pandas as pd  \n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "%matplotlib inline\n",
+    "import seaborn as sns"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 91,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.naive_bayes import GaussianNB\n",
+    "from sklearn.naive_bayes import MultinomialNB\n",
+    "from sklearn.naive_bayes import BernoulliNB\n",
+    "from sklearn.metrics import confusion_matrix,classification_report"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Import dataset \n",
+    "\n",
+    "import sys\n",
+    "\n",
+    "import os\n",
+    "\n",
+    "os.chdir(\"Desktop\\\\Dataset\")\n",
+    "\n",
+    "df = pd.read_csv(\"train_titanic.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 92,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>PassengerId</th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Name</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>SibSp</th>\n",
+       "      <th>Parch</th>\n",
+       "      <th>Ticket</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>Cabin</th>\n",
+       "      <th>Embarked</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Braund, Mr. Owen Harris</td>\n",
+       "      <td>male</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>A/5 21171</td>\n",
+       "      <td>7.2500</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>Cumings, Mrs. John Bradley (Florence Briggs Th...</td>\n",
+       "      <td>female</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>PC 17599</td>\n",
+       "      <td>71.2833</td>\n",
+       "      <td>C85</td>\n",
+       "      <td>C</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Heikkinen, Miss. Laina</td>\n",
+       "      <td>female</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>STON/O2. 3101282</td>\n",
+       "      <td>7.9250</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>Futrelle, Mrs. Jacques Heath (Lily May Peel)</td>\n",
+       "      <td>female</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>113803</td>\n",
+       "      <td>53.1000</td>\n",
+       "      <td>C123</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>5</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Allen, Mr. William Henry</td>\n",
+       "      <td>male</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>373450</td>\n",
+       "      <td>8.0500</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>S</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   PassengerId  Survived  Pclass  \\\n",
+       "0            1         0       3   \n",
+       "1            2         1       1   \n",
+       "2            3         1       3   \n",
+       "3            4         1       1   \n",
+       "4            5         0       3   \n",
+       "\n",
+       "                                                Name     Sex   Age  SibSp  \\\n",
+       "0                            Braund, Mr. Owen Harris    male  22.0      1   \n",
+       "1  Cumings, Mrs. John Bradley (Florence Briggs Th...  female  38.0      1   \n",
+       "2                             Heikkinen, Miss. Laina  female  26.0      0   \n",
+       "3       Futrelle, Mrs. Jacques Heath (Lily May Peel)  female  35.0      1   \n",
+       "4                           Allen, Mr. William Henry    male  35.0      0   \n",
+       "\n",
+       "   Parch            Ticket     Fare Cabin Embarked  \n",
+       "0      0         A/5 21171   7.2500   NaN        S  \n",
+       "1      0          PC 17599  71.2833   C85        C  \n",
+       "2      0  STON/O2. 3101282   7.9250   NaN        S  \n",
+       "3      0            113803  53.1000  C123        S  \n",
+       "4      0            373450   8.0500   NaN        S  "
+      ]
+     },
+     "execution_count": 92,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 93,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>count</th>\n",
+       "      <th>mean</th>\n",
+       "      <th>std</th>\n",
+       "      <th>min</th>\n",
+       "      <th>25%</th>\n",
+       "      <th>50%</th>\n",
+       "      <th>75%</th>\n",
+       "      <th>max</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>PassengerId</th>\n",
+       "      <td>891.0</td>\n",
+       "      <td>446.000000</td>\n",
+       "      <td>257.353842</td>\n",
+       "      <td>1.00</td>\n",
+       "      <td>223.5000</td>\n",
+       "      <td>446.0000</td>\n",
+       "      <td>668.5</td>\n",
+       "      <td>891.0000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Survived</th>\n",
+       "      <td>891.0</td>\n",
+       "      <td>0.383838</td>\n",
+       "      <td>0.486592</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>0.0000</td>\n",
+       "      <td>0.0000</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>1.0000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Pclass</th>\n",
+       "      <td>891.0</td>\n",
+       "      <td>2.308642</td>\n",
+       "      <td>0.836071</td>\n",
+       "      <td>1.00</td>\n",
+       "      <td>2.0000</td>\n",
+       "      <td>3.0000</td>\n",
+       "      <td>3.0</td>\n",
+       "      <td>3.0000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Age</th>\n",
+       "      <td>714.0</td>\n",
+       "      <td>29.699118</td>\n",
+       "      <td>14.526497</td>\n",
+       "      <td>0.42</td>\n",
+       "      <td>20.1250</td>\n",
+       "      <td>28.0000</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>80.0000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>SibSp</th>\n",
+       "      <td>891.0</td>\n",
+       "      <td>0.523008</td>\n",
+       "      <td>1.102743</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>0.0000</td>\n",
+       "      <td>0.0000</td>\n",
+       "      <td>1.0</td>\n",
+       "      <td>8.0000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Parch</th>\n",
+       "      <td>891.0</td>\n",
+       "      <td>0.381594</td>\n",
+       "      <td>0.806057</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>0.0000</td>\n",
+       "      <td>0.0000</td>\n",
+       "      <td>0.0</td>\n",
+       "      <td>6.0000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>Fare</th>\n",
+       "      <td>891.0</td>\n",
+       "      <td>32.204208</td>\n",
+       "      <td>49.693429</td>\n",
+       "      <td>0.00</td>\n",
+       "      <td>7.9104</td>\n",
+       "      <td>14.4542</td>\n",
+       "      <td>31.0</td>\n",
+       "      <td>512.3292</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "             count        mean         std   min       25%       50%    75%  \\\n",
+       "PassengerId  891.0  446.000000  257.353842  1.00  223.5000  446.0000  668.5   \n",
+       "Survived     891.0    0.383838    0.486592  0.00    0.0000    0.0000    1.0   \n",
+       "Pclass       891.0    2.308642    0.836071  1.00    2.0000    3.0000    3.0   \n",
+       "Age          714.0   29.699118   14.526497  0.42   20.1250   28.0000   38.0   \n",
+       "SibSp        891.0    0.523008    1.102743  0.00    0.0000    0.0000    1.0   \n",
+       "Parch        891.0    0.381594    0.806057  0.00    0.0000    0.0000    0.0   \n",
+       "Fare         891.0   32.204208   49.693429  0.00    7.9104   14.4542   31.0   \n",
+       "\n",
+       "                  max  \n",
+       "PassengerId  891.0000  \n",
+       "Survived       1.0000  \n",
+       "Pclass         3.0000  \n",
+       "Age           80.0000  \n",
+       "SibSp          8.0000  \n",
+       "Parch          6.0000  \n",
+       "Fare         512.3292  "
+      ]
+     },
+     "execution_count": 93,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# T for Transpose the function x and y axis \n",
+    "\n",
+    "# summary of the dataset \n",
+    "\n",
+    "df.describe().T"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 94,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 891 entries, 0 to 890\n",
+      "Data columns (total 12 columns):\n",
+      " #   Column       Non-Null Count  Dtype  \n",
+      "---  ------       --------------  -----  \n",
+      " 0   PassengerId  891 non-null    int64  \n",
+      " 1   Survived     891 non-null    int64  \n",
+      " 2   Pclass       891 non-null    int64  \n",
+      " 3   Name         891 non-null    object \n",
+      " 4   Sex          891 non-null    object \n",
+      " 5   Age          714 non-null    float64\n",
+      " 6   SibSp        891 non-null    int64  \n",
+      " 7   Parch        891 non-null    int64  \n",
+      " 8   Ticket       891 non-null    object \n",
+      " 9   Fare         891 non-null    float64\n",
+      " 10  Cabin        204 non-null    object \n",
+      " 11  Embarked     889 non-null    object \n",
+      "dtypes: float64(2), int64(5), object(5)\n",
+      "memory usage: 83.7+ KB\n"
+     ]
+    }
+   ],
+   "source": [
+    "# check data type and missing data \n",
+    "\n",
+    "df.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 95,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# drop the columns which is not required \n",
+    "\n",
+    "df=df.drop([\"PassengerId\",\"Name\",\"SibSp\",\"Parch\",\"Ticket\",\"Embarked\"],axis=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 96,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>Cabin</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>7.2500</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>71.2833</td>\n",
+       "      <td>C85</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>female</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>7.9250</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>53.1000</td>\n",
+       "      <td>C123</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>8.0500</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Survived  Pclass     Sex   Age     Fare Cabin\n",
+       "0         0       3    male  22.0   7.2500   NaN\n",
+       "1         1       1  female  38.0  71.2833   C85\n",
+       "2         1       3  female  26.0   7.9250   NaN\n",
+       "3         1       1  female  35.0  53.1000  C123\n",
+       "4         0       3    male  35.0   8.0500   NaN"
+      ]
+     },
+     "execution_count": 96,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 97,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Survived      0\n",
+       "Pclass        0\n",
+       "Sex           0\n",
+       "Age         177\n",
+       "Fare          0\n",
+       "Cabin       687\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 97,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.isna().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 98,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df=df.drop(\"Cabin\",axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 99,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df['Age']=df.Age.fillna(df.Age.mean())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 100,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Survived    0\n",
+       "Pclass      0\n",
+       "Sex         0\n",
+       "Age         0\n",
+       "Fare        0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 100,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 101,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# convert categorial to numerical using dummies\n",
+    "dummies= pd.get_dummies(df.Sex)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 102,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Fare</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>7.2500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>71.2833</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>female</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>7.9250</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>53.1000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>8.0500</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Survived  Pclass     Sex   Age     Fare\n",
+       "0         0       3    male  22.0   7.2500\n",
+       "1         1       1  female  38.0  71.2833\n",
+       "2         1       3  female  26.0   7.9250\n",
+       "3         1       1  female  35.0  53.1000\n",
+       "4         0       3    male  35.0   8.0500"
+      ]
+     },
+     "execution_count": 102,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 106,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Concatenate \n",
+    "\n",
+    "df=pd.concat([df,dummies],axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 107,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Sex</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>female</th>\n",
+       "      <th>male</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>7.2500</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>71.2833</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>female</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>7.9250</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>female</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>53.1000</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>male</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>8.0500</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Survived  Pclass     Sex   Age     Fare  female  male\n",
+       "0         0       3    male  22.0   7.2500       0     1\n",
+       "1         1       1  female  38.0  71.2833       1     0\n",
+       "2         1       3  female  26.0   7.9250       1     0\n",
+       "3         1       1  female  35.0  53.1000       1     0\n",
+       "4         0       3    male  35.0   8.0500       0     1"
+      ]
+     },
+     "execution_count": 107,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 108,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 891 entries, 0 to 890\n",
+      "Data columns (total 7 columns):\n",
+      " #   Column    Non-Null Count  Dtype  \n",
+      "---  ------    --------------  -----  \n",
+      " 0   Survived  891 non-null    int64  \n",
+      " 1   Pclass    891 non-null    int64  \n",
+      " 2   Sex       891 non-null    object \n",
+      " 3   Age       891 non-null    float64\n",
+      " 4   Fare      891 non-null    float64\n",
+      " 5   female    891 non-null    uint8  \n",
+      " 6   male      891 non-null    uint8  \n",
+      "dtypes: float64(2), int64(2), object(1), uint8(2)\n",
+      "memory usage: 36.7+ KB\n"
+     ]
+    }
+   ],
+   "source": [
+    "df.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 109,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df=df.drop(\"Sex\",axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 110,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Survived</th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>female</th>\n",
+       "      <th>male</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>7.2500</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>71.2833</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>7.9250</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>53.1000</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>8.0500</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Survived  Pclass   Age     Fare  female  male\n",
+       "0         0       3  22.0   7.2500       0     1\n",
+       "1         1       1  38.0  71.2833       1     0\n",
+       "2         1       3  26.0   7.9250       1     0\n",
+       "3         1       1  35.0  53.1000       1     0\n",
+       "4         0       3  35.0   8.0500       0     1"
+      ]
+     },
+     "execution_count": 110,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 111,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x= df.drop('Survived',axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 112,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y = df.Survived"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 113,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Pclass</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Fare</th>\n",
+       "      <th>female</th>\n",
+       "      <th>male</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>3</td>\n",
+       "      <td>22.0</td>\n",
+       "      <td>7.2500</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>38.0</td>\n",
+       "      <td>71.2833</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>3</td>\n",
+       "      <td>26.0</td>\n",
+       "      <td>7.9250</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>53.1000</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>3</td>\n",
+       "      <td>35.0</td>\n",
+       "      <td>8.0500</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Pclass   Age     Fare  female  male\n",
+       "0       3  22.0   7.2500       0     1\n",
+       "1       1  38.0  71.2833       1     0\n",
+       "2       3  26.0   7.9250       1     0\n",
+       "3       1  35.0  53.1000       1     0\n",
+       "4       3  35.0   8.0500       0     1"
+      ]
+     },
+     "execution_count": 113,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "x.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 114,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "x_train,x_test,y_train,y_test= train_test_split(x,y,test_size=0.2,random_state=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 115,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "712\n",
+      "179\n",
+      "712\n",
+      "179\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(len(x_train))\n",
+    "print(len(x_test))\n",
+    "print(len(y_train))\n",
+    "print(len(y_test))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 117,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "GaussianNB(priors=None, var_smoothing=1e-09)"
+      ]
+     },
+     "execution_count": 117,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Build model\n",
+    "\n",
+    "model1 = GaussianNB()\n",
+    "\n",
+    "model1.fit(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 123,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Train Accuracy is  0.7823033707865169\n",
+      "Test Accuracy is 0.776536312849162\n"
+     ]
+    }
+   ],
+   "source": [
+    "# check Gaussian Accuracy score \n",
+    "\n",
+    "print(\"Train Accuracy is \", model1.score(x_train,y_train))\n",
+    "print(\"Test Accuracy is\" ,model1.score(x_test,y_test))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 128,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "BernoulliNB(alpha=1.0, binarize=0.1, class_prior=None, fit_prior=True)"
+      ]
+     },
+     "execution_count": 128,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model2 = BernoulliNB(binarize=0.1)\n",
+    "model2.fit(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 129,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Train Accuracy is  0.7893258426966292\n",
+      "Test Accuracy is 0.776536312849162\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Train Accuracy is \", model2.score(x_train,y_train))\n",
+    "print(\"Test Accuracy is\" ,model2.score(x_test,y_test))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 132,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "MultinomialNB(alpha=1.0, class_prior=None, fit_prior=True)"
+      ]
+     },
+     "execution_count": 132,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model3 = MultinomialNB(alpha=1.0)\n",
+    "model3.fit(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 146,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Train Accuracy is  0.7064606741573034\n",
+      "Test Accuracy is 0.6480446927374302\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Train Accuracy is \", model3.score(x_train,y_train))\n",
+    "print(\"Test Accuracy is\" ,model3.score(x_test,y_test))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 134,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#y_pred_train = model1.predict(x_train)\n",
+    "#y_pred_test = model1.predict(x_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 140,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[373,  70],\n",
+       "       [139, 130]], dtype=int64)"
+      ]
+     },
+     "execution_count": 140,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#cf1 = confusion_matrix(y_train,y_pred_train)\n",
+    "#cf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 147,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_pred_train = model2.predict(x_train)\n",
+    "y_pred_test = model2.predict(x_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 148,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[373,  70],\n",
+       "       [139, 130]], dtype=int64)"
+      ]
+     },
+     "execution_count": 148,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cf2 = confusion_matrix(y_train,y_pred_train)\n",
+    "cf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 138,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#y_pred_train = model3.predict(x_train)\n",
+    "#y_pred_test = model3.predict(x_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 142,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[373,  70],\n",
+       "       [139, 130]], dtype=int64)"
+      ]
+     },
+     "execution_count": 142,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#cf3 = confusion_matrix(y_train,y_pred_train)\n",
+    "#cf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 149,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.79      0.85      0.82       106\n",
+      "           1       0.75      0.67      0.71        73\n",
+      "\n",
+      "    accuracy                           0.78       179\n",
+      "   macro avg       0.77      0.76      0.76       179\n",
+      "weighted avg       0.77      0.78      0.77       179\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(classification_report(y_test,y_pred_test))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 150,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.82      0.85      0.83       443\n",
+      "           1       0.74      0.68      0.71       269\n",
+      "\n",
+      "    accuracy                           0.79       712\n",
+      "   macro avg       0.78      0.77      0.77       712\n",
+      "weighted avg       0.79      0.79      0.79       712\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(classification_report(y_train,y_pred_train))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 151,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "TypeError",
+     "evalue": "heatmap() missing 1 required positional argument: 'data'",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mTypeError\u001b[0m                                 Traceback (most recent call last)",
+      "\u001b[1;32m<ipython-input-151-85cfec567147>\u001b[0m in \u001b[0;36m<module>\u001b[1;34m\u001b[0m\n\u001b[1;32m----> 1\u001b[1;33m \u001b[0msns\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mheatmap\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mlabels\u001b[0m\u001b[1;33m=\u001b[0m\u001b[1;34m\"y_test\"\u001b[0m\u001b[1;33m,\u001b[0m\u001b[0mprediction\u001b[0m\u001b[1;33m=\u001b[0m\u001b[1;34m\"y_pred_test\"\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m",
+      "\u001b[1;31mTypeError\u001b[0m: heatmap() missing 1 required positional argument: 'data'"
+     ]
+    }
+   ],
+   "source": [
+    "sns.heatmap(labels=\"y_test\",prediction=\"y_pred_test\")"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

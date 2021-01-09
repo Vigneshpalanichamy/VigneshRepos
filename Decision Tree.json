@@ -1,0 +1,1181 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Based on the given loan data can we understand the major factors or characteristics of a borrower which makes them to get into delinquent stage.\n",
+    "• Delinquency is a major metric in assessing risk as more and more customers getting delinquent means the risk of customers that will default will also increase.\n",
+    "• The main objective is to minimize the risk for which you need to build a decision tree model using CART technique that will identify various risk and non-risk attributes of borrower’s to get into delinquent stage"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Data Set is Loan defaulter list\n",
+    "Build Decision tree model\n",
+    "Dentify the reason could be person defaulter\n",
+    "Total rows 9 and columns 11548"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# import Required libraries \n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "%matplotlib inline"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# impport Sklearn packages\n",
+    "from sklearn import tree\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.tree import DecisionTreeClassifier\n",
+    "from sklearn.metrics import confusion_matrix , classification_report,precision_score"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# import Data set\n",
+    "\n",
+    "df = pd.read_csv(\"Loan.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>ID</th>\n",
+       "      <th>delinquent</th>\n",
+       "      <th>Sdelinquent</th>\n",
+       "      <th>term</th>\n",
+       "      <th>gender</th>\n",
+       "      <th>purpose</th>\n",
+       "      <th>home_ownership</th>\n",
+       "      <th>age</th>\n",
+       "      <th>FICO</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Mortgage</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>2</td>\n",
+       "      <td>No</td>\n",
+       "      <td>0</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Rent</td>\n",
+       "      <td>20-25</td>\n",
+       "      <td>&gt;500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>3</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Rent</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>4</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Car</td>\n",
+       "      <td>Mortgage</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>5</td>\n",
+       "      <td>Yes</td>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Rent</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   ID delinquent  Sdelinquent       term  gender purpose home_ownership  \\\n",
+       "0   1        Yes            1  36 months  Female   House       Mortgage   \n",
+       "1   2         No            0  36 months  Female   House           Rent   \n",
+       "2   3        Yes            1  36 months  Female   House           Rent   \n",
+       "3   4        Yes            1  36 months  Female     Car       Mortgage   \n",
+       "4   5        Yes            1  36 months  Female   House           Rent   \n",
+       "\n",
+       "     age     FICO  \n",
+       "0    >25  300-500  \n",
+       "1  20-25     >500  \n",
+       "2    >25  300-500  \n",
+       "3    >25  300-500  \n",
+       "4    >25  300-500  "
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# View the few lines of dataset \n",
+    "\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Drop unwanted ID and Duplicate delinquent columns\n",
+    "\n",
+    "# we can use axis = cloumns\n",
+    "\n",
+    "df= df.drop(['ID','delinquent'],axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Sdelinquent</th>\n",
+       "      <th>term</th>\n",
+       "      <th>gender</th>\n",
+       "      <th>purpose</th>\n",
+       "      <th>home_ownership</th>\n",
+       "      <th>age</th>\n",
+       "      <th>FICO</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Mortgage</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Rent</td>\n",
+       "      <td>20-25</td>\n",
+       "      <td>&gt;500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Rent</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Car</td>\n",
+       "      <td>Mortgage</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1</td>\n",
+       "      <td>36 months</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>House</td>\n",
+       "      <td>Rent</td>\n",
+       "      <td>&gt;25</td>\n",
+       "      <td>300-500</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Sdelinquent       term  gender purpose home_ownership    age     FICO\n",
+       "0            1  36 months  Female   House       Mortgage    >25  300-500\n",
+       "1            0  36 months  Female   House           Rent  20-25     >500\n",
+       "2            1  36 months  Female   House           Rent    >25  300-500\n",
+       "3            1  36 months  Female     Car       Mortgage    >25  300-500\n",
+       "4            1  36 months  Female   House           Rent    >25  300-500"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Sdelinquent       0\n",
+       "term              0\n",
+       "gender            0\n",
+       "purpose           0\n",
+       "home_ownership    0\n",
+       "age               0\n",
+       "FICO              0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<class 'pandas.core.frame.DataFrame'>\n",
+      "RangeIndex: 11548 entries, 0 to 11547\n",
+      "Data columns (total 7 columns):\n",
+      " #   Column          Non-Null Count  Dtype \n",
+      "---  ------          --------------  ----- \n",
+      " 0   Sdelinquent     11548 non-null  int64 \n",
+      " 1   term            11548 non-null  object\n",
+      " 2   gender          11548 non-null  object\n",
+      " 3   purpose         11548 non-null  object\n",
+      " 4   home_ownership  11548 non-null  object\n",
+      " 5   age             11548 non-null  object\n",
+      " 6   FICO            11548 non-null  object\n",
+      "dtypes: int64(1), object(6)\n",
+      "memory usage: 631.7+ KB\n"
+     ]
+    }
+   ],
+   "source": [
+    "# to see data types\n",
+    "\n",
+    "df.info()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "36 months    10589\n",
+      "60 months      959\n",
+      "Name: term, dtype: int64\n",
+      "\n",
+      "\n",
+      "Male      6555\n",
+      "Female    4993\n",
+      "Name: gender, dtype: int64\n",
+      "\n",
+      "\n",
+      "House       6892\n",
+      "Car         2080\n",
+      "Other        928\n",
+      "Personal     892\n",
+      "Wedding      408\n",
+      "Medical      266\n",
+      "other         82\n",
+      "Name: purpose, dtype: int64\n",
+      "\n",
+      "\n",
+      "Mortgage    5461\n",
+      "Rent        5216\n",
+      "Own          871\n",
+      "Name: home_ownership, dtype: int64\n",
+      "\n",
+      "\n",
+      "20-25    5888\n",
+      ">25      5660\n",
+      "Name: age, dtype: int64\n",
+      "\n",
+      "\n",
+      "300-500    6370\n",
+      ">500       5178\n",
+      "Name: FICO, dtype: int64\n",
+      "\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "for column in df.columns:\n",
+    "    if df[column].dtype == 'object':\n",
+    "        print(df[column].value_counts())\n",
+    "        print(\"\\n\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# numerical Encoders \n",
+    "for column in df.columns:\n",
+    "    if df[column].dtype ==\"object\":\n",
+    "        pd.Categorical(df[column]).unique\n",
+    "        df[column]=pd.Categorical(df[column]).codes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Sdelinquent</th>\n",
+       "      <th>term</th>\n",
+       "      <th>gender</th>\n",
+       "      <th>purpose</th>\n",
+       "      <th>home_ownership</th>\n",
+       "      <th>age</th>\n",
+       "      <th>FICO</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Sdelinquent  term  gender  purpose  home_ownership  age  FICO\n",
+       "0            1     0       0        1               0    1     0\n",
+       "1            0     0       0        1               2    0     1\n",
+       "2            1     0       0        1               2    1     0\n",
+       "3            1     0       0        0               0    1     0\n",
+       "4            1     0       0        1               2    1     0"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# All objects converted to numerical values \n",
+    "\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# no need to check outliers \n",
+    "# all 0 and 1 so correlation is not valid\n",
+    "# separate target and predictors \n",
+    "\n",
+    "x=  df.drop(\"Sdelinquent\",axis=1)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y= df.Sdelinquent"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "   term  gender  purpose  home_ownership  age  FICO\n",
+      "0     0       0        1               0    1     0\n",
+      "1     0       0        1               2    0     1\n",
+      "0    1\n",
+      "1    0\n",
+      "Name: Sdelinquent, dtype: int64\n"
+     ]
+    }
+   ],
+   "source": [
+    "# check dimension and data for x and y \n",
+    "\n",
+    "print(x.head(2))\n",
+    "\n",
+    "print(y.head(2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# split data into train and test\n",
+    "\n",
+    "x_train,x_test,y_train,y_test= train_test_split(x,y,test_size=0.3,random_state=12)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "8083\n",
+      "3465\n",
+      "8083\n",
+      "3465\n"
+     ]
+    }
+   ],
+   "source": [
+    "# check dimensions of train and test \n",
+    "\n",
+    "print(len(x_train))\n",
+    "print(len(x_test))\n",
+    "print(len(y_train))\n",
+    "print(len(y_test))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Model Evaluation"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Build the model\n",
+    "\n",
+    "model =  DecisionTreeClassifier(criterion='gini')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "DecisionTreeClassifier(ccp_alpha=0.0, class_weight=None, criterion='gini',\n",
+       "                       max_depth=None, max_features=None, max_leaf_nodes=None,\n",
+       "                       min_impurity_decrease=0.0, min_impurity_split=None,\n",
+       "                       min_samples_leaf=1, min_samples_split=2,\n",
+       "                       min_weight_fraction_leaf=0.0, presort='deprecated',\n",
+       "                       random_state=None, splitter='best')"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# fit the model\n",
+    "\n",
+    "model.fit(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.8526537176790796"
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Check accuracy at first\n",
+    "\n",
+    "model.score(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.8458874458874459"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# accuracy for test data \n",
+    "\n",
+    "model.score(x_test,y_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# predict test data by model \n",
+    "\n",
+    "y_pred_train = model.predict(x_train)\n",
+    "y_pred_test = model.predict(x_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[1984,  682],\n",
+       "       [ 509, 4908]], dtype=int64)"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Confusion Matrix \n",
+    "\n",
+    "cf = confusion_matrix (y_train,y_pred_train)\n",
+    "cf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.80      0.74      0.77      2666\n",
+      "           1       0.88      0.91      0.89      5417\n",
+      "\n",
+      "    accuracy                           0.85      8083\n",
+      "   macro avg       0.84      0.83      0.83      8083\n",
+      "weighted avg       0.85      0.85      0.85      8083\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Check precision , recall and F1 score \n",
+    "\n",
+    "print(classification_report(y_train,y_pred_train))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[1984,  682],\n",
+       "       [ 509, 4908]], dtype=int64)"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cftest = confusion_matrix(y_test,y_pred_test)\n",
+    "cf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.79      0.73      0.76      1161\n",
+      "           1       0.87      0.90      0.89      2304\n",
+      "\n",
+      "    accuracy                           0.85      3465\n",
+      "   macro avg       0.83      0.82      0.82      3465\n",
+      "weighted avg       0.84      0.85      0.84      3465\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(classification_report(y_test,y_pred_test))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                     Imp\n",
+      "term            0.399480\n",
+      "FICO            0.378519\n",
+      "gender          0.148676\n",
+      "age             0.050130\n",
+      "purpose         0.015820\n",
+      "home_ownership  0.007375\n"
+     ]
+    }
+   ],
+   "source": [
+    "# important variables\n",
+    "print (pd.DataFrame(model.feature_importances_, columns = [\"Imp\"], index = x_train.columns).sort_values('Imp',ascending=False))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Build and Evaluate turned model"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Adding Tune parameter and build models\n",
+    "\n",
+    "model =  DecisionTreeClassifier(criterion='gini',max_depth =30,min_samples_leaf = 100,min_samples_split =1000)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "DecisionTreeClassifier(ccp_alpha=0.0, class_weight=None, criterion='gini',\n",
+       "                       max_depth=30, max_features=None, max_leaf_nodes=None,\n",
+       "                       min_impurity_decrease=0.0, min_impurity_split=None,\n",
+       "                       min_samples_leaf=100, min_samples_split=1000,\n",
+       "                       min_weight_fraction_leaf=0.0, presort='deprecated',\n",
+       "                       random_state=None, splitter='best')"
+      ]
+     },
+     "execution_count": 31,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model.fit(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# EValuate model with Tuned parameter"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.8292713101571199"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# verify the same\n",
+    "\n",
+    "model.score(x_train,y_train)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.8331890331890331"
+      ]
+     },
+     "execution_count": 33,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "model.score(x_test,y_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_train_predict = model.predict(x_train)\n",
+    "y_test_predict = model.predict(x_test)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "y_train_predict (8083,)\n",
+      "y_test_predict (3465,)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('y_train_predict',y_train_predict.shape)\n",
+    "print('y_test_predict',y_test_predict.shape)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[0.74623656, 0.25376344],\n",
+       "       [0.        , 1.        ],\n",
+       "       [0.20915033, 0.79084967],\n",
+       "       ...,\n",
+       "       [0.51043115, 0.48956885],\n",
+       "       [0.51043115, 0.48956885],\n",
+       "       [0.        , 1.        ]])"
+      ]
+     },
+     "execution_count": 36,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# predicting the train and test class and prob\n",
+    "\n",
+    "y_test_predict\n",
+    "y_test_predict_prob = model.predict_proba(x_test)\n",
+    "y_test_predict_prob"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0.746237</td>\n",
+       "      <td>0.253763</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0.000000</td>\n",
+       "      <td>1.000000</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0.209150</td>\n",
+       "      <td>0.790850</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0.195228</td>\n",
+       "      <td>0.804772</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1.000000</td>\n",
+       "      <td>0.000000</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          0         1\n",
+       "0  0.746237  0.253763\n",
+       "1  0.000000  1.000000\n",
+       "2  0.209150  0.790850\n",
+       "3  0.195228  0.804772\n",
+       "4  1.000000  0.000000"
+      ]
+     },
+     "execution_count": 37,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "pd.DataFrame(y_test_predict_prob).head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[1984,  682],\n",
+       "       [ 509, 4908]], dtype=int64)"
+      ]
+     },
+     "execution_count": 38,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# confusion matrix\n",
+    "\n",
+    "confusion_matrix(y_train,y_train_predict)\n",
+    "cf"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "           0       0.73      0.76      0.75      2666\n",
+      "           1       0.88      0.86      0.87      5417\n",
+      "\n",
+      "    accuracy                           0.83      8083\n",
+      "   macro avg       0.81      0.81      0.81      8083\n",
+      "weighted avg       0.83      0.83      0.83      8083\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Classification report for train\n",
+    "\n",
+    "print(classification_report(y_train,y_train_predict))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Classification Report"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Accuracy on the Training Data: 83%\n",
+    "Accuracy on the Test Data: 82%\n",
+    "\n",
+    "AUC on the Training Data: 87.9%\n",
+    "AUC on the Test: 88.1%\n",
+    "\n",
+    "Accuracy, AUC, Precision and Recall for test data is almost inline with training data.\n",
+    "This proves no overfitting or underfitting has happened, and overall the model is a good model for classification\n",
+    "\n",
+    "FICO, term and gender (in same order of preference) are the most important variables in determining if a borrower will get into a delinquent stage\n",
+    "Improvement"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
