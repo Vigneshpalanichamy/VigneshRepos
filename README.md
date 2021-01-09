@@ -29,6 +29,10 @@ It consists of several plots like line, bar, scatter, histogram etc.
 Matplotlib is a multi-platform data visualization library built on NumPy arrays.
 One of the advantage of visualization is that it allows us visual access to huge amounts of data in easily digestible visuals.
 
+##### Spacy Library 
+
+spaCy has better implementation and also provides better performance. It handles all the text and documents as packets or objects to be specific. NLTK on the other hand treats each text as group of strings.spaCy provides better connectors for statistical models developed in other libraries such as Keras, PyTorch, etc.If you want any additional feature that is available in other library you can call it through spaCy library.
+
 process notes:
 
 1) imported libraries to work with 
@@ -64,3 +68,13 @@ process notes:
 13)2nd model used SVM - Support Vector Machines (SVMs) are widely applied in the field of pattern classifications and nonlinear regressions.SVMs have been transformed tremendously to be used successfully in many real-world problems such as text (and hypertext) categorization, image classification, bioinformatics (Protein classification, Cancer classification), handwritten character recognition, etc.
 
 14) In this case SVM performs better than Random forest classifier
+
+15)Text Summarization  - To pick up some important sentence through automated NLP process
+
+16) Spam_detection_with_CNN 
+
+17) Spam_detection_with_CNN_and_RNN
+
+18)Restaurant_Reviews_and_classification
+
+19)IMDB_and_Amazon_Review_classification_with_spacy
